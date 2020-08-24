@@ -41,6 +41,8 @@ pub use frame_support::{
 /// Import the template pallet.
 pub use template;
 
+pub use erc20;
+
 /// An index to a block.
 pub type BlockNumber = u32;
 
@@ -262,6 +264,11 @@ impl template::Trait for Runtime {
 	type Event = Event;
 }
 
+impl erc20::Trait for Runtime {
+	type Event = Event;
+	type TokenBalance = u64;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -279,6 +286,7 @@ construct_runtime!(
 		Sudo: pallet_sudo::{Module, Call, Config<T>, Storage, Event<T>},
 		// Include the custom logic from the template pallet in the runtime.
 		TemplateModule: template::{Module, Call, Storage, Event<T>},
+		Erc20Module: erc20::{Module, Call, Storage, Event<T>},
 	}
 );
 
