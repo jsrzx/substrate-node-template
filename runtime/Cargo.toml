@@ -171,6 +171,12 @@ package = 'pallet-erc20'
 path = '../pallets/erc20'
 version = '2.0.0-rc6'
 
+[dependencies.poe]  
+default-features = false
+package = 'pallet-poe'
+path = '../pallets/poe'                                                                                                                                                           
+version = '2.0.0-rc6'
+
 [features]
 default = ['std']
 std = [
@@ -201,6 +207,7 @@ std = [
     'sp-version/std',
     'template/std',
     'erc20/std',
+    'poe/std',
 ]
 
 [build-dependencies.wasm-builder-runner]
