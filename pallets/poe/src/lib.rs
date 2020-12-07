@@ -2,7 +2,7 @@
 
 // 1. Imports
 use frame_support::{
-    decl_module, decl_storage, decl_event, decl_error, ensure, StorageMap
+    decl_error, decl_event, decl_module, decl_storage, dispatch, ensure, StorageMap,
 };
 use frame_system::{self as system, ensure_signed};
 use sp_std::vec::Vec;
@@ -13,21 +13,23 @@ pub trait Trait: system::Trait {
 }
 
 // 3. Pallet Storage Items
-decl_storage! { 
+decl_storage! {
     trait Store for Module<T: Trait> as TemplateModule {
         /// The storage item for our proofs.
         /// It maps a proof to the user who made the claim and when they made it.
-        Proofs: map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber);                                                                                          
-    }   
-}  
+        Proofs: map hasher(blake2_128_concat) Vec<u8> => (T::AccountId, T::BlockNumber);
+    }
+}
 
-// 4. Pallet Events 
-decl_event! {       
+// 4. Pallet Events
+decl_event! {
     pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
         /// Event emitted when a proof has been claimed.
         ClaimCreated(AccountId, Vec<u8>),
         /// Event emitted when a claim is revoked by the owner.
         ClaimRevoked(AccountId, Vec<u8>),
+        /// Event emitted when a claim is transfer by the owner.
+        ClaimTransfer(AccountId, Vec<u8>),
     }
 }
 
@@ -37,7 +39,7 @@ decl_error! {
         /// This proof has already been claimed
         ProofAlreadyClaimed,
         /// The proof does not exist, so it cannot be revoked
-        NoSuchProof,                                                                                                    
+        NoSuchProof,
         /// The proof is claimed by another account, so caller can't revoke it
         NotProofOwner,
         NotClaimOwner,
