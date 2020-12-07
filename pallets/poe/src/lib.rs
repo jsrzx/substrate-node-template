@@ -40,6 +40,8 @@ decl_error! {
         NoSuchProof,                                                                                                    
         /// The proof is claimed by another account, so caller can't revoke it
         NotProofOwner,
+        NotClaimOwner,
+        ClaimNotExist,
     }
 }
 
@@ -95,6 +97,26 @@ decl_module! {
 
             // Emit an event that the claim was erased
             Self::deposit_event(RawEvent::ClaimRevoked(sender, proof));
+        }
+
+        // 转移存证
+        #[weight = 10_000]
+        pub fn transfer_claim(origin, claim: Vec<u8>, receiver: T::AccountId) -> dispatch::DispatchResult {
+            let sender = ensure_signed(origin)?;
+
+            // 存证不存在
+            ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
+
+            // 不是拥有者
+            let (owner, block_number) = Proofs::<T>::get(&claim);
+            ensure!(owner == sender, Error::<T>::NotClaimOwner);
+
+            Proofs::<T>::remove(&claim);
+            Proofs::<T>::insert(&claim, (receiver.clone(), block_number));
+
+            Self::deposit_event(RawEvent::ClaimTransfer(receiver, claim));
+
+            Ok(())
         }
     }
 }
