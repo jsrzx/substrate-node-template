@@ -7,6 +7,12 @@ use frame_support::{
 use frame_system::{self as system, ensure_signed};
 use sp_std::vec::Vec;
 
+#[cfg(test)]
+mod mock;
+
+#[cfg(test)]
+mod tests;
+
 // 2. Pallet Configuration
 pub trait Trait: system::Trait {
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
@@ -43,7 +49,6 @@ decl_error! {
         /// The proof is claimed by another account, so caller can't revoke it
         NotProofOwner,
         NotClaimOwner,
-        ClaimNotExist,
     }
 }
 
@@ -107,13 +112,12 @@ decl_module! {
             let sender = ensure_signed(origin)?;
 
             // 存证不存在
-            ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::ClaimNotExist);
+            ensure!(Proofs::<T>::contains_key(&claim), Error::<T>::NoSuchProof);
 
             // 不是拥有者
             let (owner, block_number) = Proofs::<T>::get(&claim);
             ensure!(owner == sender, Error::<T>::NotClaimOwner);
 
-            Proofs::<T>::remove(&claim);
             Proofs::<T>::insert(&claim, (receiver.clone(), block_number));
 
             Self::deposit_event(RawEvent::ClaimTransfer(receiver, claim));
