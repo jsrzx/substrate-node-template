@@ -51,8 +51,13 @@ impl system::Trait for Test {
     type SystemWeightInfo = ();
 }
 
+parameter_types! {
+    pub const MaxClaimLength: u32 = 5;
+}
+
 impl Trait for Test {
     type Event = ();
+    type MaxClaimLength = MaxClaimLength;
 }
 
 pub type PoeModule = Module<Test>;

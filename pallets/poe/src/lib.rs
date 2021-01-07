@@ -2,7 +2,7 @@
 
 // 1. Imports
 use frame_support::{
-    decl_error, decl_event, decl_module, decl_storage, dispatch, ensure, StorageMap,
+    decl_error, decl_event, decl_module, decl_storage, dispatch, ensure, traits::Get, StorageMap,
 };
 use frame_system::{self as system, ensure_signed};
 use sp_std::vec::Vec;
@@ -16,6 +16,8 @@ mod tests;
 // 2. Pallet Configuration
 pub trait Trait: system::Trait {
     type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+
+    type MaxClaimLength: Get<u32>;
 }
 
 // 3. Pallet Storage Items
@@ -49,6 +51,7 @@ decl_error! {
         /// The proof is claimed by another account, so caller can't revoke it
         NotProofOwner,
         NotClaimOwner,
+        ProofTooLong,
     }
 }
 
@@ -73,6 +76,8 @@ decl_module! {
 
             // Verify that the specified proof has not been claimed yet or error with the message
             ensure!(!Proofs::<T>::contains_key(&proof), Error::<T>::ProofAlreadyClaimed);
+
+            ensure!(T::MaxClaimLength::get() >= proof.len() as u32, Error::<T>::ProofTooLong);
 
             // Call the `system` pallet to get the current block number
             let current_block = <system::Module<T>>::block_number();
