@@ -20,7 +20,7 @@ type KittyIndex = u32;
 
 // kitty的DNA数据
 #[derive(Encode, Decode)]
-pub struct Kitty(pub [u8; 16])
+pub struct Kitty(pub [u8; 16]);
 
 // 2. Pallet Configuration
 pub trait Trait: frame_system::Trait {
@@ -31,6 +31,8 @@ pub trait Trait: frame_system::Trait {
 // 3. Pallet Storage Items
 decl_storage! {
     pub Kitties get(fn kitties): map hasher(blake2_128_concat) KittyIndex => Option<Kitty>;
+    pub KittiesCount get(fn kitties_count): KittyIndex;
+    pub KittyOwner get(fn kitty_owner): map hasher(blake2_128_concat) KittyIndex => Option<T::AccountId>
 }
 
 // 4. Pallet Events
