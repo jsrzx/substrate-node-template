@@ -59,5 +59,19 @@ decl_module! {
         // A default function for depositing events
         fn deposit_event() = default;
 
+        // 创建小猫
+        #[weight=0]
+        pub fn create(origin) {
+            let sender = ensure_signed(origin)?;
+            let kitty_id = Self::next_kitty_id()?;
+        }
+
+    }
+}
+
+impl<T: Trait> Module<T> {
+    fn next_kitty_id() -> sp_std::result::Result<KittyIndex, DispatchError> {
+        let kitty_id = Self::kitties_count();
+        if kitty_id == KittyIndex::max_value() {}
     }
 }
