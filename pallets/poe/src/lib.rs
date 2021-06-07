@@ -27,6 +27,8 @@ pub mod pallet {
         ClaimCreated(T::AccountId, Vec<u8>),
         /// Event emitted when a claim is revoked by the owner. [who, claim]
         ClaimRevoked(T::AccountId, Vec<u8>),
+        /// Event emitted when a claim is transfer to other user by the owner. [who, claim]
+        ClaimTransfered(T::AccountId, T::AccountId, Vec<u8>),
     }
 
     #[pallet::error]
@@ -106,6 +108,26 @@ pub mod pallet {
 
             // Emit an event that the claim was erased.
             Self::deposit_event(Event::ClaimRevoked(sender, proof));
+
+            Ok(().into())
+        }
+
+        #[pallet::weight(10_000)]
+        fn transfer_claim(
+            origin: OriginFor<T>,
+            proof: Vec<u8>,
+            receiver: T::AccountId,
+        ) -> DispatchResultWithPostInfo {
+            let sender = ensure_signed(origin)?;
+
+            ensure!(Proofs::<T>::contains_key(&proof), Error::<T>::NoSuchProof);
+
+            let (owner, block_number) = Proofs::<T>::get(&proof);
+            ensure!(sender == owner, Error::<T>::NotProofOwner);
+
+            Proofs::<T>::insert(&proof, (receiver.clone(), block_number));
+
+            Self::deposit_event(Event::ClaimTransfered(sender, receiver, proof));
 
             Ok(().into())
         }
